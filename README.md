@@ -17,13 +17,17 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/mast
 
 # Create deployments, services and ingress
 
+```console
 kubectl apply -f api-deployment.yml
 kubectl apply -f api-service.yml
 kubectl apply -f api-ingress.yml
+```
 
+```console
 kubectl apply -f ui-deployment.yml
 kubectl apply -f ui-service.yml
 kubectl apply -f ui-ingress.yml
+```
 
 # Access de swagger-ui
 
@@ -35,6 +39,8 @@ http://localhost/v2/swagger.json
 
 # Stop the environment
 
+```console
 kubectl delete deployments,services,ingress --all
+```
 
 WARNING: This is going to remove default kubernetes service but the cluster is going to restart
