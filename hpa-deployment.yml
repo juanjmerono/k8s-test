@@ -1,0 +1,90 @@
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: localhpatest
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: localhpatest
+  minReplicas: 2
+  maxReplicas: 15
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageUtilization: 100
+      type: Resource
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: localhpatest
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /hpa(/|$)(.*)
+        backend:
+          serviceName: localhpatest
+          servicePort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: localhpatest
+  labels:
+    component: localhpatest
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    component: localhpatest
+  type: "NodePort"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: localhpatest
+  labels:
+    component: localhpatest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: "localhpatest"
+  template:
+    metadata:
+      labels:
+        component: "localhpatest"
+    spec:
+      containers:
+        - name: localhpatest
+          image: "localhpatest:latest"
+          imagePullPolicy: "Never"
+          ports:
+          - name: http
+            containerPort: 8080
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits: 
+              cpu: "100m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            timeoutSeconds: 5
+            initialDelaySeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            timeoutSeconds: 5
+            initialDelaySeconds: 20

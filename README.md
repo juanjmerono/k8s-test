@@ -44,3 +44,17 @@ kubectl delete deployments,services,ingress --all
 ```
 
 WARNING: This is going to remove default kubernetes service but the cluster is going to restart
+
+# Testing HPA
+
+Follow instructions here: https://medium.com/@dstrimble/kubernetes-horizontal-pod-autoscaling-for-local-development-d211e52c309c
+
+```console
+kubectl apply -f hpa-deployment.yml
+```
+
+Now you can run a loadtest with taurus docker image
+
+```console
+kubectl run -i --tty load-generator --image=blazemeter/taurus -- http://localhpatest.default.svc.cluster.local:8080/
+```
